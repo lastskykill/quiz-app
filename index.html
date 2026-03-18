@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Human System Mastery Ultimate</title>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- 📱 PWA -->
+<link rel="manifest" href="manifest.json">
+</head>
+
+<body class="bg-black text-white">
+
+<!-- START -->
+<div id="startScreen" class="min-h-screen flex flex-col justify-center items-center text-center p-6">
+<h1 class="text-3xl font-bold mb-4">🧠 Human System Mastery</h1>
+
+<div class="grid grid-cols-2 gap-3 w-full max-w-md">
+<button onclick="chooseLevel('m4')" class="bg-blue-600 p-4 rounded">ม.4</button>
+<button onclick="chooseLevel('m5')" class="bg-purple-600 p-4 rounded">ม.5</button>
+<button onclick="chooseLevel('m6')" class="bg-red-600 p-4 rounded">ม.6</button>
+<button onclick="chooseLevel('all')" class="bg-green-600 p-4 rounded">รวม</button>
+<button onclick="chooseLevel('fast')" class="col-span-2 bg-yellow-500 p-4 rounded">⚡ Fast</button>
+</div>
+</div>
+
+<!-- GAME -->
+<div id="gameScreen" class="hidden max-w-5xl mx-auto p-6">
+
+<div class="flex justify-between mb-4">
+<div id="timer">⏱️ 0</div>
+<button onclick="location.reload()" class="bg-gray-700 px-3 py-1 rounded">ออก</button>
+</div>
+
+<div id="quizBox"></div>
+<div id="resultBox" class="hidden"></div>
+
+</div>
+
+<script>
+
+// ================== DATA (ของเดิม) ==================
+const m4=[{q:"เซลล์คืออะไร?",a:"หน่วยเล็กสุดของชีวิต"},{q:"mitochondria ทำหน้าที่?",a:"สร้างพลังงาน"},{q:"DNA อยู่ที่ไหน?",a:"nucleus"},{q:"osmosis คือ?",a:"น้ำผ่านเยื่อ"},{q:"diffusion คือ?",a:"จากมากไปน้อย"},{q:"ATP คือ?",a:"พลังงาน"},{q:"neuron คือ?",a:"เซลล์ประสาท"},{q:"alveoli คือ?",a:"ถุงลม"},{q:"hemoglobin ทำหน้าที่?",a:"ขนส่งออกซิเจน"},{q:"enzyme คือ?",a:"เร่งปฏิกิริยา"},{q:"cell membrane?",a:"ควบคุมการเข้าออก"},{q:"ribosome?",a:"สร้างโปรตีน"},{q:"lysosome?",a:"ย่อย"},{q:"cytoplasm?",a:"ของเหลวในเซลล์"},{q:"organ คือ?",a:"อวัยวะ"},{q:"tissue?",a:"เนื้อเยื่อ"},{q:"organ system?",a:"ระบบอวัยวะ"},{q:"respiration?",a:"หายใจ"},{q:"circulation?",a:"ไหลเวียนเลือด"},{q:"excretion?",a:"ขับของเสีย"},{q:"kidney?",a:"กรองเลือด"},{q:"liver?",a:"กำจัดสารพิษ"},{q:"skin?",a:"ป้องกัน"},{q:"bone?",a:"โครงสร้าง"},{q:"muscle?",a:"เคลื่อนไหว"},{q:"brain?",a:"ควบคุม"},{q:"heart?",a:"สูบเลือด"},{q:"lung?",a:"แลกเปลี่ยนแก๊ส"},{q:"oxygen?",a:"ใช้สร้างพลังงาน"},{q:"glucose?",a:"แหล่งพลังงาน"}];
+
+const m5=[{q:"mitosis คือ?",a:"แบ่งเซลล์"},{q:"gene คือ?",a:"หน่วยพันธุกรรม"},{q:"phenotype?",a:"ลักษณะภายนอก"},{q:"genotype?",a:"ลักษณะทางยีน"},{q:"immune system?",a:"ป้องกันโรค"},{q:"bacteria?",a:"prokaryote"},{q:"virus?",a:"ไม่มีเซลล์"},{q:"glycolysis?",a:"ใน cytoplasm"},{q:"aerobic?",a:"ใช้ O2"},{q:"anaerobic?",a:"ไม่ใช้ O2"},{q:"homeostasis?",a:"สมดุลร่างกาย"},{q:"negative feedback?",a:"ลด"},{q:"positive feedback?",a:"เพิ่ม"},{q:"mutation?",a:"เปลี่ยนยีน"},{q:"DNA replication?",a:"จำลอง DNA"},{q:"transcription?",a:"DNA → RNA"},{q:"translation?",a:"RNA → โปรตีน"},{q:"protein?",a:"กรดอะมิโน"},{q:"lipid?",a:"ไขมัน"},{q:"carbohydrate?",a:"น้ำตาล"},{q:"enzyme specificity?",a:"จำเพาะ"},{q:"lock and key?",a:"แบบจำลองเอนไซม์"},{q:"antibody?",a:"โปรตีนภูมิคุ้มกัน"},{q:"antigen?",a:"สิ่งแปลกปลอม"},{q:"vaccine?",a:"กระตุ้นภูมิ"},{q:"cell cycle?",a:"วงจรเซลล์"},{q:"chromosome?",a:"โครงสร้าง DNA"},{q:"meiosis?",a:"สร้างเซลล์สืบพันธุ์"},{q:"gamete?",a:"เซลล์สืบพันธุ์"},{q:"fertilization?",a:"ปฏิสนธิ"}];
+
+const m6=[{q:"stroke คือ?",a:"สมองขาดเลือด"},{q:"hypertension?",a:"ความดันสูง"},{q:"diabetes?",a:"น้ำตาลสูง"},{q:"heart attack?",a:"ขาดเลือดหัวใจ"},{q:"anemia?",a:"เม็ดเลือดต่ำ"},{q:"dialysis?",a:"ฟอกไต"},{q:"cancer?",a:"เซลล์แบ่งผิด"},{q:"tumor?",a:"ก้อน"},{q:"antibiotic?",a:"ฆ่าแบคทีเรีย"},{q:"fever?",a:"อุณหภูมิสูง"},{q:"insulin?",a:"ลดน้ำตาล"},{q:"glucagon?",a:"เพิ่มน้ำตาล"},{q:"neuron damage?",a:"สูญเสียการทำงาน"},{q:"lung disease?",a:"หายใจลำบาก"},{q:"kidney failure?",a:"ไตล้มเหลว"},{q:"liver cirrhosis?",a:"ตับแข็ง"},{q:"infection?",a:"ติดเชื้อ"},{q:"inflammation?",a:"อักเสบ"},{q:"immune response?",a:"ตอบสนองภูมิ"},{q:"hormone?",a:"สารควบคุม"},{q:"endocrine?",a:"ฮอร์โมน"},{q:"nervous system?",a:"ประสาท"},{q:"reflex?",a:"ตอบสนองเร็ว"},{q:"spinal cord?",a:"ไขสันหลัง"},{q:"brain stem?",a:"ควบคุมพื้นฐาน"},{q:"cerebrum?",a:"คิด"},{q:"cerebellum?",a:"สมดุล"},{q:"pituitary?",a:"ต่อมหลัก"},{q:"thyroid?",a:"เผาผลาญ"},{q:"adrenal?",a:"ความเครียด"}];
+
+const all=[...m4,...m5,...m6];
+
+// ================== ENGINE ==================
+let current=[],index=0,answers=[];
+let time=0,timerInterval;
+
+// timer
+function startTimer(){
+time=0;
+clearInterval(timerInterval);
+timerInterval=setInterval(()=>{
+time++;
+document.getElementById('timer').innerText="⏱️ "+time+"s";
+},1000);
+}
+
+function stopTimer(){
+clearInterval(timerInterval);
+}
+
+// shuffle
+function shuffle(a){return a.sort(()=>Math.random()-0.5);}
+
+// generate options
+function genOpt(c){
+let pool=all.map(x=>x.a).filter(x=>x!==c);
+return shuffle([c,...shuffle(pool).slice(0,3)]);
+}
+
+// start
+function chooseLevel(type){
+document.getElementById('startScreen').classList.add('hidden');
+document.getElementById('gameScreen').classList.remove('hidden');
+start(type);
+}
+
+function start(type){
+index=0;answers=[];
+startTimer();
+
+if(type==='m4') current=[...m4];
+if(type==='m5') current=[...m5];
+if(type==='m6') current=[...m6];
+if(type==='all') current=[...all];
+if(type==='fast') current=shuffle([...all]).slice(0,10);
+
+current=shuffle(current).map(q=>({...q,options:genOpt(q.a)}));
+
+render();
+}
+
+function render(){
+let q=current[index];
+let html=`<h2 class="mb-4">${q.q}</h2>`;
+q.options.forEach(o=>{
+html+=`<button onclick="answer('${o}',this)" class="block w-full p-4 mb-3 bg-gray-700 rounded">${o}</button>`;
+});
+html+=`<p>ข้อ ${index+1}/${current.length}</p>`;
+quizBox.innerHTML=html;
+}
+
+function answer(opt,btn){
+let q=current[index];
+let correct=opt===q.a;
+answers.push({...q,selected:opt,isCorrect:correct});
+
+let btns=document.querySelectorAll('#quizBox button');
+btns.forEach(b=>b.disabled=true);
+
+btns.forEach(b=>{
+if(b.innerText===q.a){b.classList.add('bg-green-600');}
+else if(b===btn){b.classList.add('bg-red-600');}
+});
+
+setTimeout(()=>{
+index++;
+if(index>=current.length) finish();
+else render();
+},600);
+}
+
+// finish + วิเคราะห์
+function finish(){
+stopTimer();
+
+let score=answers.filter(a=>a.isCorrect).length;
+
+// วิเคราะห์จุดอ่อน
+let wrongTopics={};
+answers.filter(a=>!a.isCorrect).forEach(a=>{
+wrongTopics[a.q]=(wrongTopics[a.q]||0)+1;
+});
+
+let weak = Object.keys(wrongTopics).slice(0,5);
+
+let html=`<h2 class="text-xl mb-4">คะแนน ${score}/${answers.length}</h2>`;
+html+=`<p>เวลา: ${time} วินาที</p>`;
+
+html+=`<h3 class="mt-4">🔥 จุดอ่อน</h3>`;
+weak.forEach(w=>{html+=`<p>- ${w}</p>`});
+
+answers.forEach((a,i)=>{
+html+=`<div class="border-b py-2">
+${i+1}. ${a.q}<br>
+เลือก: ${a.selected} ${a.isCorrect?"✅":"❌"}<br>
+เฉลย: ${a.a}
+</div>`;
+});
+
+quizBox.innerHTML="";
+resultBox.innerHTML=html;
+resultBox.classList.remove('hidden');
+}
+
+</script>
+
+</body>
+</html>
